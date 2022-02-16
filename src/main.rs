@@ -13,6 +13,7 @@ fn main() -> Result<(), Error> {
 
     println!("Devices: \n{:?}", devices);
 
+    //Get the devices, filter out ones that failed, and turn them into our special device struct
     let devices = devices
         .iter()
         .map(|x| (Device::open(x), x))
