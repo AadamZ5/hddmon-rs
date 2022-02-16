@@ -17,20 +17,20 @@ fn main() -> Result<(), Error> {
     let devices = devices
         .iter()
         .map(|x| (Device::open(x), x))
-        .filter(|(dev, path)| !dev.is_err())
+        .filter(|(dev, _)| !dev.is_err())
         .map(|(dev, path)| (dev.unwrap(), path))
         .map(|(dev, path)| {
             let new_dev = HMDevice {
                 path: path.to_path_buf(),
                 device_type: match dev.get_type() {
-                    Err(e) => DeviceType::Unknown,
+                    Err(_) => DeviceType::Unknown,
                     Ok(hdd::Type::SCSI) => {
                         // Stolen from crate hdd source code
                         // check whether devices replies to ATA PASS-THROUGH
                         let satdev = ATADevice::new(SCSIDevice::new(dev));
                         match hdd::ata::misc::Misc::get_device_id(&satdev) {
                             // this is really an ATA device
-                            Ok(id) => DeviceType::ATA(satdev),
+                            Ok(_) => DeviceType::ATA(satdev),
                             // nnnnope, plain SCSI
                             Err(hdd::ata::misc::Error::SCSI(hdd::scsi::ATAError::NotSupported)) => {
                                 DeviceType::SCSI(satdev.unwrap())
@@ -38,7 +38,6 @@ fn main() -> Result<(), Error> {
                             _ => DeviceType::SCSI(satdev.unwrap()),
                         }
                     }
-                    _ => DeviceType::Unknown,
                 },
             };
             return new_dev;
